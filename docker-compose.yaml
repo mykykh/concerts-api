@@ -1,9 +1,30 @@
 services:
+  concerts-api-server:
+    depends_on:
+      - db
+    build:
+      context: .
+    container_name: concerts-api-server
+    hostname: concerts-api-server
+    networks:
+      - concerts-api-network
+    ports:
+      - 8080:8080
+    deploy:
+      restart_policy:
+        condition: on-failure
   db:
     image: postgres:17-bookworm
+    hostname: db
+    networks:
+      - concerts-api-network
     ports:
       - 5342:5342
     environment:
       POSTGRES_PASSWORD: "postgres"
     volumes:
       - ./configs/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+networks:
+  concerts-api-network:
+    driver: bridge
