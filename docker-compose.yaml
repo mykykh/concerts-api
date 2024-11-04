@@ -10,6 +10,8 @@ services:
       - concerts-api-network
     ports:
       - 8080:8080
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres@db:5432/postgres"
     deploy:
       restart_policy:
         condition: on-failure
