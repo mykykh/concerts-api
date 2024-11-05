@@ -4,11 +4,12 @@ import (
     "time"
 )
 
-type concert struct {
+type Concert struct {
     ID int64
 
-    Name string
+    Title string
     Description string
-    CreateTime time.Time
-    UpdateTime time.Time
+    Location string
+    CreateDate time.Time
+    UpdateDate time.Time
 }

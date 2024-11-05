@@ -21,23 +21,23 @@ func connectToDB() (*pgxpool.Pool) {
             fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v\n", err)
             os.Exit(1)
     }
-    defer dbpool.Close()
 
     return dbpool
 }
 
-func initRouter() chi.Router {
+func initRouter(db *pgxpool.Pool) chi.Router {
     router := chi.NewRouter()
 
-    router.Mount("/concerts", ConcertsResource{}.Routes())
+    router.Mount("/concerts", ConcertsResource{db: db}.Routes())
 
     return router
 }
 
 func Init() Api {
-    api := Api{db: connectToDB(), router: initRouter()}
+    db := connectToDB()
+    router := initRouter(db)
 
-    return api
+    return Api{db: db, router: router};
 }
 
 func (api Api) Run() {
