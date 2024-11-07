@@ -1,8 +1,8 @@
 package repositories
 
 import (
-    "fmt"
     "time"
+    "errors"
     "context"
 
     "github.com/jackc/pgx/v5/pgxpool"
@@ -10,7 +10,7 @@ import (
     "github.com/mykykh/concerts-api/internal/domain"
 )
 
-func Save(db *pgxpool.Pool, concert domain.Concert) {
+func Save(db *pgxpool.Pool, concert domain.Concert) error {
     _, err := db.Exec(
         context.Background(),
         "INSERT INTO concerts(title, description, location) VALUES ($1, $2, $3)",
@@ -20,11 +20,13 @@ func Save(db *pgxpool.Pool, concert domain.Concert) {
     );
 
     if err != nil {
-        fmt.Println(err)
+        return errors.New("Failed to save concert")
     }
+
+    return nil
 }
 
-func GetById(db *pgxpool.Pool, id int64) domain.Concert {
+func GetById(db *pgxpool.Pool, id int64) (*domain.Concert, error) {
     var title, description, location string;
     var createDate, updateDate time.Time;
 
@@ -35,15 +37,15 @@ func GetById(db *pgxpool.Pool, id int64) domain.Concert {
     ).Scan(&title, &description, &location, &createDate, &updateDate);
 
     if err != nil {
-        fmt.Println(err)
+        return nil, errors.New("Failed to get concert")
     }
 
-    return domain.Concert{
+    return &domain.Concert{
         ID: id,
         Title: title,
         Description: description,
         Location: location,
         CreateDate: createDate,
         UpdateDate: updateDate,
-    };
+    }, nil
 }

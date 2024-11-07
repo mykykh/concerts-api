@@ -1,7 +1,6 @@
 package api
 
 import (
-    "time"
     "strconv"
     "net/http"
     "encoding/json"
@@ -36,23 +35,37 @@ func (rs ConcertsResource) GetAll(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rs ConcertsResource) Create(w http.ResponseWriter, r *http.Request) {
-    concert := domain.Concert {
-        ID: 0,
-        Title: "test",
-        Description: "",
-        Location: "test",
-        CreateDate: time.Now(),
-        UpdateDate: time.Now(),
-    };
-    repositories.Save(rs.db, concert);
+    var concert domain.Concert;
+
+    err := json.NewDecoder(r.Body).Decode(&concert);
+
+    if err != nil {
+        http.Error(w, http.StatusText(400), 400)
+        return
+    }
+
+    err = repositories.Save(rs.db, concert);
+
+    if err != nil {
+        http.Error(w, http.StatusText(500), 500)
+        return
+    }
 }
 
 func (rs ConcertsResource) Get(w http.ResponseWriter, r *http.Request) {
     id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
     if err != nil {
+        http.Error(w, http.StatusText(400), 400)
         return
     }
-    concert := repositories.GetById(rs.db, id)
+
+    concert, err := repositories.GetById(rs.db, id)
+
+    if err != nil {
+        http.Error(w, http.StatusText(404), 404)
+        return
+    }
+
     json.NewEncoder(w).Encode(concert)
 }
 

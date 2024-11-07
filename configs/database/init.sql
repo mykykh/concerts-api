@@ -9,8 +9,8 @@ CREATE TABLE users (
     full_name TEXT,
     CHECK (char_length(full_name) <= 255),
     CHECK (char_length(full_name) > 1),
-    create_date timestamp with time zone default CURRENT_DATE,
-    update_date timestamp with time zone default CURRENT_DATE
+    create_date timestamp with time zone default CURRENT_TIMESTAMP,
+    update_date timestamp with time zone default CURRENT_TIMESTAMP
 );
 
 CREATE TABLE concerts (
@@ -20,8 +20,8 @@ CREATE TABLE concerts (
     CHECK (char_length(title) > 1),
     description TEXT,
     location TEXT,
-    create_date timestamp with time zone default CURRENT_DATE,
-    update_date timestamp with time zone default CURRENT_DATE
+    create_date timestamp with time zone default CURRENT_TIMESTAMP,
+    update_date timestamp with time zone default CURRENT_TIMESTAMP
 );
 
 CREATE TABLE tickets (
@@ -29,8 +29,8 @@ CREATE TABLE tickets (
     verification_token TEXT NOT NULL,
     CHECK (char_length(verification_token) <= 255),
     CHECK (char_length(verification_token) > 1),
-    create_date timestamp with time zone default CURRENT_DATE,
-    update_date timestamp with time zone default CURRENT_DATE,
+    create_date timestamp with time zone default CURRENT_TIMESTAMP,
+    update_date timestamp with time zone default CURRENT_TIMESTAMP,
     concert_id BIGINT references concerts(concert_id),
     user_id BIGINT references users(user_id)
 )

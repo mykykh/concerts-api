@@ -5,11 +5,11 @@ import (
 )
 
 type Concert struct {
-    ID int64
+    ID int64 `json:"id"`
 
-    Title string
-    Description string
-    Location string
-    CreateDate time.Time
-    UpdateDate time.Time
+    Title string `json:"title"`
+    Description string `json:"description"`
+    Location string `json:"location"`
+    CreateDate time.Time `json:"create-date"`
+    UpdateDate time.Time `json:"update-date"`
 }
