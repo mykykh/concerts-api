@@ -11,7 +11,7 @@ services:
     ports:
       - 8080:8080
     environment:
-      DATABASE_URL: "postgresql://postgres:postgres@db:5432/postgres"
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}"
     deploy:
       restart_policy:
         condition: on-failure
@@ -23,7 +23,9 @@ services:
     ports:
       - 5342:5342
     environment:
-      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - ./configs/database/init.sql:/docker-entrypoint-initdb.d/init.sql
 
