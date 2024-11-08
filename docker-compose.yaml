@@ -28,6 +28,24 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - ./configs/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0.5
+    command: start-dev
+    environment:
+      KC_HTTP_PORT: 8081
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://db/${POSTGRES_DB}
+      KC_DB_USERNAME: ${POSTGRES_USER}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - 8081:8081
+    restart: always
+    networks:
+      - concerts-api-network
+    depends_on:
+      - db
 
 networks:
   concerts-api-network:
