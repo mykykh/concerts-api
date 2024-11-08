@@ -1,12 +1,17 @@
 package api
 
 import (
+    "os"
+    "fmt"
+    "errors"
     "strconv"
     "net/http"
     "encoding/json"
 
+    "golang.org/x/oauth2"
     "github.com/go-chi/chi/v5"
     "github.com/jackc/pgx/v5/pgxpool"
+    "github.com/coreos/go-oidc/v3/oidc"
 
     "github.com/mykykh/concerts-api/internal/domain"
     "github.com/mykykh/concerts-api/internal/repositories"
@@ -22,12 +27,57 @@ func (rs ConcertsResource) Routes() chi.Router {
     r.Get("/", rs.GetAll)
     r.Post("/", rs.Create)
 
+    r.Get("/test", rs.handleOAuth2Callback)
+
     r.Route("/{id}", func (r chi.Router) {
         r.Get("/", rs.Get)
         r.Put("/", rs.Update)
     })
 
     return r
+}
+
+func initOauth() (*oauth2.Config, error) {
+    provider, err := oidc.NewProvider(oauth2.NoContext, os.Getenv("OAUTH_SERVER_HOSTNAME"))
+    if err != nil {
+        fmt.Println(err)
+        return nil, errors.New("Failed to create oidc provider")
+    }
+
+    // Configure an OpenID Connect aware OAuth2 client.
+    oauth2Config := oauth2.Config{
+        ClientID:     os.Getenv("OAUTH_CLIENT_ID"),
+        ClientSecret: os.Getenv("OAUTH_CLIENT_SECRET"),
+
+        // Discovery returns the OAuth2 endpoints.
+        Endpoint: provider.Endpoint(),
+
+        // "openid" is a required scope for OpenID Connect flows.
+        Scopes: []string{oidc.ScopeOpenID, "email"},
+    }
+
+    return &oauth2Config, nil
+}
+
+
+func (rs ConcertsResource) handleOAuth2Callback(w http.ResponseWriter, r *http.Request) {
+    oauth2Config, err := initOauth()
+    oauth2Token, err := oauth2Config.Exchange(oauth2.NoContext, r.URL.Query().Get("code"))
+    if err != nil {
+        fmt.Println(err)
+        return
+        // handle error
+    }
+
+    // Extract the ID Token from OAuth2 token.
+    rawIDToken, ok := oauth2Token.Extra("id_token").(string)
+    if !ok {
+        fmt.Println(err)
+        return
+        // handle missing token
+    }
+
+    fmt.Println(rawIDToken)
 }
 
 func (rs ConcertsResource) GetAll(w http.ResponseWriter, r *http.Request) {

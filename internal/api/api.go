@@ -35,6 +35,7 @@ func initRouter(db *pgxpool.Pool) chi.Router {
 
 func Init() Api {
     db := connectToDB()
+
     router := initRouter(db)
 
     return Api{db: db, router: router};
