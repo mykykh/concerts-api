@@ -1,17 +1,11 @@
 package main
 
 import (
-    "net/http"
-
-    "github.com/go-chi/chi/v5"
+    "github.com/mykykh/concerts-api/internal/api"
 )
 
 func main() {
-    r := chi.NewRouter()
+    api := api.Init()
 
-    r.Get("/", func (w http.ResponseWriter, r *http.Request) {
-        w.Write([]byte("test"))
-    })
-
-    http.ListenAndServe(":8080", r)
+    api.Run()
 }
