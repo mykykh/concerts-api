@@ -27,7 +27,8 @@ func (rs ConcertsResource) Routes() chi.Router {
     r.Get("/", rs.GetAll)
     r.Post("/", rs.Create)
 
-    r.Get("/test", rs.handleOAuth2Callback)
+    r.Get("/login", rs.handleRedirect)
+    r.Get("/callback", rs.handleOAuth2Callback)
 
     r.Route("/{id}", func (r chi.Router) {
         r.Get("/", rs.Get)
@@ -48,6 +49,7 @@ func initOauth() (*oauth2.Config, error) {
     oauth2Config := oauth2.Config{
         ClientID:     os.Getenv("OAUTH_CLIENT_ID"),
         ClientSecret: os.Getenv("OAUTH_CLIENT_SECRET"),
+        RedirectURL: "http://localhost:8080/concerts/callback",
 
         // Discovery returns the OAuth2 endpoints.
         Endpoint: provider.Endpoint(),
@@ -57,6 +59,17 @@ func initOauth() (*oauth2.Config, error) {
     }
 
     return &oauth2Config, nil
+}
+
+func (rs ConcertsResource) handleRedirect(w http.ResponseWriter, r *http.Request) {
+    state := "random_state"
+    oauth2Config, err := initOauth()
+    if err != nil {
+        fmt.Println(err)
+        return
+        // handle error
+    }
+    http.Redirect(w, r, oauth2Config.AuthCodeURL(state), http.StatusFound)
 }
 
 
@@ -77,7 +90,29 @@ func (rs ConcertsResource) handleOAuth2Callback(w http.ResponseWriter, r *http.R
         // handle missing token
     }
 
-    fmt.Println(rawIDToken)
+    provider, err := oidc.NewProvider(oauth2.NoContext, os.Getenv("OAUTH_SERVER_HOSTNAME"))
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+    verifier := provider.Verifier(&oidc.Config{ClientID: os.Getenv("OAUTH_CLIENT_ID")})
+    idToken, err := verifier.Verify(oauth2.NoContext, rawIDToken)
+    if err != nil {
+        fmt.Println(err)
+        return
+        // handle error
+    }
+
+    // Extract custom claims
+    var claims struct {
+        Email    string `json:"email"`
+        Verified bool   `json:"email_verified"`
+    }
+    if err := idToken.Claims(&claims); err != nil {
+        // handle error
+    }
+
+    fmt.Println(claims)
 }
 
 func (rs ConcertsResource) GetAll(w http.ResponseWriter, r *http.Request) {
