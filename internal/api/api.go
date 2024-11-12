@@ -28,6 +28,7 @@ func connectToDB() (*pgxpool.Pool) {
 func initRouter(db *pgxpool.Pool) chi.Router {
     router := chi.NewRouter()
 
+    router.Mount("/auth", AuthResource{}.Routes())
     router.Mount("/concerts", ConcertsResource{db: db}.Routes())
 
     return router
@@ -35,6 +36,7 @@ func initRouter(db *pgxpool.Pool) chi.Router {
 
 func Init() Api {
     db := connectToDB()
+
     router := initRouter(db)
 
     return Api{db: db, router: router};
