@@ -9,6 +9,8 @@ import (
 
     "golang.org/x/oauth2"
     "github.com/coreos/go-oidc/v3/oidc"
+
+    "github.com/mykykh/concerts-api/internal/auth"
 )
 
 func AuthMiddleware(next http.Handler) http.Handler {
@@ -39,18 +41,15 @@ func AuthMiddleware(next http.Handler) http.Handler {
             return
         }
 
-        var claims struct {
-            Email    string `json:"email"`
-            Verified bool   `json:"email_verified"`
-        }
+        var claims auth.Claims
         if err := idToken.Claims(&claims); err != nil {
             // handle error
+            http.Error(w, "Failed to parse claims", http.StatusUnauthorized)
             return
         }
 
         // Token is valid, pass the request to the next handler
-        fmt.Println(claims)
-        r = r.WithContext(context.WithValue(r.Context(), "user", claims))
+        r = r.WithContext(context.WithValue(r.Context(), "claims", claims))
         next.ServeHTTP(w, r)
     })
 }

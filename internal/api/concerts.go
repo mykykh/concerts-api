@@ -8,6 +8,7 @@ import (
     "github.com/go-chi/chi/v5"
     "github.com/jackc/pgx/v5/pgxpool"
 
+    "github.com/mykykh/concerts-api/internal/auth"
     "github.com/mykykh/concerts-api/internal/domain"
     "github.com/mykykh/concerts-api/internal/repositories"
     "github.com/mykykh/concerts-api/internal/middlewares"
@@ -21,12 +22,11 @@ func (rs ConcertsResource) Routes() chi.Router {
     r := chi.NewRouter()
 
     r.Get("/", rs.GetAll)
-    r.Post("/", rs.Create)
+    r.With(middlewares.AuthMiddleware).Post("/", rs.Create)
 
     r.Route("/{id}", func (r chi.Router) {
-        r.Use(middlewares.AuthMiddleware)
         r.Get("/", rs.Get)
-        r.Put("/", rs.Update)
+        r.With(middlewares.AuthMiddleware).Put("/", rs.Update)
     })
 
     return r
@@ -44,6 +44,17 @@ func (rs ConcertsResource) GetAll(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rs ConcertsResource) Create(w http.ResponseWriter, r *http.Request) {
+    claims, ok := r.Context().Value("claims").(auth.Claims)
+    if !ok {
+        http.Error(w, "No claims found", http.StatusUnauthorized)
+        return
+    }
+
+    if !claims.HasResourceAccessRole("concerts-api", "concerts-create") {
+        http.Error(w, "No concerts-create role found", http.StatusUnauthorized)
+        return
+    }
+
     var concert domain.Concert;
 
     err := json.NewDecoder(r.Body).Decode(&concert);
@@ -79,7 +90,17 @@ func (rs ConcertsResource) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rs ConcertsResource) Update(w http.ResponseWriter, r *http.Request) {
-    var concert domain.Concert;
+    claims, ok := r.Context().Value("claims").(auth.Claims)
+    if !ok {
+        http.Error(w, "No claims found", http.StatusUnauthorized)
+        return
+    }
+
+    if !claims.HasResourceAccessRole("concerts-api", "concerts-update") {
+        http.Error(w, "No concerts-update role found", http.StatusUnauthorized)
+        return
+    }
+    var concert domain.Concert
 
     id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
     if err != nil {
