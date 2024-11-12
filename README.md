@@ -3,7 +3,7 @@
 ## How to setup
 1. Clone the repo:
 ```sh
-git clone
+git clone https://github.com/mykykh/concerts-api.git
 ```
 
 2. Create .env file:
