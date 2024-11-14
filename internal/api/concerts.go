@@ -10,7 +10,7 @@ import (
 
     "github.com/mykykh/concerts-api/internal/auth"
     "github.com/mykykh/concerts-api/internal/domain"
-    "github.com/mykykh/concerts-api/internal/repositories"
+    concertsRepository "github.com/mykykh/concerts-api/internal/repositories/concerts"
     "github.com/mykykh/concerts-api/internal/middlewares"
 )
 
@@ -33,7 +33,7 @@ func (rs ConcertsResource) Routes() chi.Router {
 }
 
 func (rs ConcertsResource) GetAll(w http.ResponseWriter, r *http.Request) {
-    concerts, err := repositories.GetAll(rs.db)
+    concerts, err := concertsRepository.GetAll(rs.db)
 
     if err != nil {
         http.Error(w, http.StatusText(500), 500)
@@ -64,7 +64,7 @@ func (rs ConcertsResource) Create(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    err = repositories.Save(rs.db, concert);
+    err = concertsRepository.Save(rs.db, concert);
 
     if err != nil {
         http.Error(w, http.StatusText(500), 500)
@@ -79,7 +79,7 @@ func (rs ConcertsResource) Get(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    concert, err := repositories.GetById(rs.db, id)
+    concert, err := concertsRepository.GetById(rs.db, id)
 
     if err != nil {
         http.Error(w, http.StatusText(404), 404)
@@ -117,7 +117,7 @@ func (rs ConcertsResource) Update(w http.ResponseWriter, r *http.Request) {
 
     concert.ID = id
 
-    err = repositories.Update(rs.db, concert);
+    err = concertsRepository.Update(rs.db, concert);
 
     if err != nil {
         http.Error(w, http.StatusText(500), 500)

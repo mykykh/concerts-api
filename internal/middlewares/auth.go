@@ -2,7 +2,6 @@ package middlewares
 
 import (
     "os"
-    "fmt"
     "strings"
     "context"
     "net/http"
@@ -41,8 +40,8 @@ func AuthMiddleware(next http.Handler) http.Handler {
             return
         }
 
-        var claims auth.Claims
-        if err := idToken.Claims(&claims); err != nil {
+        claims, err := auth.TokenToClaims(idToken)
+        if err != nil {
             // handle error
             http.Error(w, "Failed to parse claims", http.StatusUnauthorized)
             return
