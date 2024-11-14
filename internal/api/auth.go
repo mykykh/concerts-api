@@ -86,6 +86,7 @@ func saveTokenUserToDB(db *pgxpool.Pool, token *oauth2.Token) error {
     err = usersRepository.SaveOrUpdate(db, user)
 
     if err != nil {
+        fmt.Println(err)
         return errors.New("Failed to save user")
     }
     return nil

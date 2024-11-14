@@ -10,20 +10,20 @@ type ResourceRoles struct {
 }
 
 type Claims struct {
-    ID uuid.UUID `json:"sub"`
-    Username string `json:"prefered_username"`
+    ID uuid.UUID `json:"id"`
+    Username string `json:"username"`
     Email string `json:"email"`
     FullName string `json:"full-name"`
-    EmailVerified bool `json:"email_verified"`
-    ResourceAccess map[string]ResourceRoles `json:"resource_access"`
+    EmailVerified bool `json:"email-verified"`
+    ResourceAccess map[string]ResourceRoles `json:"resource-access"`
 }
 
 func TokenToClaims(token *oidc.IDToken) (*Claims, error) {
     var temp struct {
         ID string `json:"sub"`
-        Username string `json:"prefered_username"`
+        Username string `json:"preferred_username"`
         Email string `json:"email"`
-        FullName string `json:"full-name"`
+        FullName string `json:"name"`
         EmailVerified bool `json:"email_verified"`
         ResourceAccess map[string]ResourceRoles `json:"resource_access"`
     }
