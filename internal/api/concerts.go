@@ -59,6 +59,8 @@ func (rs ConcertsResource) Create(w http.ResponseWriter, r *http.Request) {
 
     err := json.NewDecoder(r.Body).Decode(&concert);
 
+    concert.AuthorID = claims.ID;
+
     if err != nil {
         http.Error(w, http.StatusText(400), 400)
         return
@@ -96,11 +98,12 @@ func (rs ConcertsResource) Update(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    if !claims.HasResourceAccessRole("concerts-api", "concerts-update") {
-        http.Error(w, "No concerts-update role found", http.StatusUnauthorized)
-        return
+    if !claims.HasResourceAccessRole("concerts-api", "concerts-update-any") {
+        if !claims.HasResourceAccessRole("concerts-api", "concerts-update") {
+            http.Error(w, "No concerts-update role found", http.StatusUnauthorized)
+            return
+        }
     }
-    var concert domain.Concert
 
     id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
     if err != nil {
@@ -108,16 +111,29 @@ func (rs ConcertsResource) Update(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    err = json.NewDecoder(r.Body).Decode(&concert)
+    concert, err := concertsRepository.GetById(rs.db, id)
+    if err != nil {
+        http.Error(w, "Concert with id not found", http.StatusNotFound)
+        return
+    }
+
+    if !claims.HasResourceAccessRole("concerts-api", "concerts-update-any") {
+        if concert.AuthorID != claims.ID {
+            http.Error(w, "Unauthorized to update concert with id", http.StatusUnauthorized)
+        }
+    }
+
+    var updatedConcert domain.Concert
+    err = json.NewDecoder(r.Body).Decode(&updatedConcert)
 
     if err != nil {
         http.Error(w, http.StatusText(400), 400)
         return
     }
 
-    concert.ID = id
+    updatedConcert.ID = id
 
-    err = concertsRepository.Update(rs.db, concert);
+    err = concertsRepository.Update(rs.db, updatedConcert);
 
     if err != nil {
         http.Error(w, http.StatusText(500), 500)

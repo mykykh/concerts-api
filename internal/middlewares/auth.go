@@ -29,6 +29,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 
         provider, err := oidc.NewProvider(oauth2.NoContext, os.Getenv("OAUTH_SERVER_HOSTNAME"))
         if err != nil {
+            http.Error(w, "Failed to connect to provider", http.StatusInternalServerError)
             return
         }
         verifier := provider.Verifier(&oidc.Config{ClientID: os.Getenv("OAUTH_CLIENT_ID")})
@@ -48,7 +49,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
         }
 
         // Token is valid, pass the request to the next handler
-        r = r.WithContext(context.WithValue(r.Context(), "claims", claims))
+        r = r.WithContext(context.WithValue(r.Context(), "claims", *claims))
         next.ServeHTTP(w, r)
     })
 }
