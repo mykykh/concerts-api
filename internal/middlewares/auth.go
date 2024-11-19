@@ -2,7 +2,6 @@ package middlewares
 
 import (
     "os"
-    "fmt"
     "strings"
     "context"
     "net/http"
@@ -30,6 +29,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 
         provider, err := oidc.NewProvider(oauth2.NoContext, os.Getenv("OAUTH_SERVER_HOSTNAME"))
         if err != nil {
+            http.Error(w, "Failed to connect to provider", http.StatusInternalServerError)
             return
         }
         verifier := provider.Verifier(&oidc.Config{ClientID: os.Getenv("OAUTH_CLIENT_ID")})
@@ -41,15 +41,15 @@ func AuthMiddleware(next http.Handler) http.Handler {
             return
         }
 
-        var claims auth.Claims
-        if err := idToken.Claims(&claims); err != nil {
+        claims, err := auth.TokenToClaims(idToken)
+        if err != nil {
             // handle error
             http.Error(w, "Failed to parse claims", http.StatusUnauthorized)
             return
         }
 
         // Token is valid, pass the request to the next handler
-        r = r.WithContext(context.WithValue(r.Context(), "claims", claims))
+        r = r.WithContext(context.WithValue(r.Context(), "claims", *claims))
         next.ServeHTTP(w, r)
     })
 }

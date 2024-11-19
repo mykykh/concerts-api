@@ -52,7 +52,7 @@ services:
       - keycloak-db
   keycloak-db:
     image: postgres:17-bookworm
-    hostname: db
+    hostname: keycloak-db
     networks:
       - concerts-api-network
     environment:

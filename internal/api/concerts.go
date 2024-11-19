@@ -10,7 +10,7 @@ import (
 
     "github.com/mykykh/concerts-api/internal/auth"
     "github.com/mykykh/concerts-api/internal/domain"
-    "github.com/mykykh/concerts-api/internal/repositories"
+    concertsRepository "github.com/mykykh/concerts-api/internal/repositories/concerts"
     "github.com/mykykh/concerts-api/internal/middlewares"
 )
 
@@ -33,7 +33,7 @@ func (rs ConcertsResource) Routes() chi.Router {
 }
 
 func (rs ConcertsResource) GetAll(w http.ResponseWriter, r *http.Request) {
-    concerts, err := repositories.GetAll(rs.db)
+    concerts, err := concertsRepository.GetAll(rs.db)
 
     if err != nil {
         http.Error(w, http.StatusText(500), 500)
@@ -59,12 +59,14 @@ func (rs ConcertsResource) Create(w http.ResponseWriter, r *http.Request) {
 
     err := json.NewDecoder(r.Body).Decode(&concert);
 
+    concert.AuthorID = claims.ID;
+
     if err != nil {
         http.Error(w, http.StatusText(400), 400)
         return
     }
 
-    err = repositories.Save(rs.db, concert);
+    err = concertsRepository.Save(rs.db, concert);
 
     if err != nil {
         http.Error(w, http.StatusText(500), 500)
@@ -79,7 +81,7 @@ func (rs ConcertsResource) Get(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    concert, err := repositories.GetById(rs.db, id)
+    concert, err := concertsRepository.GetById(rs.db, id)
 
     if err != nil {
         http.Error(w, http.StatusText(404), 404)
@@ -96,11 +98,12 @@ func (rs ConcertsResource) Update(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    if !claims.HasResourceAccessRole("concerts-api", "concerts-update") {
-        http.Error(w, "No concerts-update role found", http.StatusUnauthorized)
-        return
+    if !claims.HasResourceAccessRole("concerts-api", "concerts-update-any") {
+        if !claims.HasResourceAccessRole("concerts-api", "concerts-update") {
+            http.Error(w, "No concerts-update role found", http.StatusUnauthorized)
+            return
+        }
     }
-    var concert domain.Concert
 
     id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
     if err != nil {
@@ -108,16 +111,29 @@ func (rs ConcertsResource) Update(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    err = json.NewDecoder(r.Body).Decode(&concert)
+    concert, err := concertsRepository.GetById(rs.db, id)
+    if err != nil {
+        http.Error(w, "Concert with id not found", http.StatusNotFound)
+        return
+    }
+
+    if !claims.HasResourceAccessRole("concerts-api", "concerts-update-any") {
+        if concert.AuthorID != claims.ID {
+            http.Error(w, "Unauthorized to update concert with id", http.StatusUnauthorized)
+        }
+    }
+
+    var updatedConcert domain.Concert
+    err = json.NewDecoder(r.Body).Decode(&updatedConcert)
 
     if err != nil {
         http.Error(w, http.StatusText(400), 400)
         return
     }
 
-    concert.ID = id
+    updatedConcert.ID = id
 
-    err = repositories.Update(rs.db, concert);
+    err = concertsRepository.Update(rs.db, updatedConcert);
 
     if err != nil {
         http.Error(w, http.StatusText(500), 500)

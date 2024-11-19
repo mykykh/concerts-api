@@ -1,5 +1,5 @@
 CREATE TABLE users (
-    user_id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    user_id UUID PRIMARY KEY,
     username TEXT UNIQUE NOT NULL,
     CHECK (char_length(username) <= 255),
     CHECK (char_length(username) > 1),
@@ -20,6 +20,7 @@ CREATE TABLE concerts (
     CHECK (char_length(title) > 1),
     description TEXT,
     location TEXT,
+    author_id UUID NOT NULL references users(user_id),
     create_date timestamp with time zone default CURRENT_TIMESTAMP,
     update_date timestamp with time zone default CURRENT_TIMESTAMP
 );
@@ -31,6 +32,6 @@ CREATE TABLE tickets (
     CHECK (char_length(verification_token) > 1),
     create_date timestamp with time zone default CURRENT_TIMESTAMP,
     update_date timestamp with time zone default CURRENT_TIMESTAMP,
-    concert_id BIGINT references concerts(concert_id),
-    user_id BIGINT references users(user_id)
+    concert_id BIGINT NOT NULL references concerts(concert_id),
+    user_id UUID NOT NULL references users(user_id)
 )
