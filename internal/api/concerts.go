@@ -32,6 +32,9 @@ func (rs ConcertsResource) Routes() chi.Router {
     return r
 }
 
+// @Summary Returns list of concerts
+// @Tags Concerts
+// @Router /concerts [get]
 func (rs ConcertsResource) GetAll(w http.ResponseWriter, r *http.Request) {
     concerts, err := concertsRepository.GetAll(rs.db)
 
@@ -43,6 +46,10 @@ func (rs ConcertsResource) GetAll(w http.ResponseWriter, r *http.Request) {
     json.NewEncoder(w).Encode(concerts)
 }
 
+// @Summary Creates new concert
+// @Tags Concerts
+// @Param concert body domain.Concert true "Concert to create"
+// @Router /concerts [post]
 func (rs ConcertsResource) Create(w http.ResponseWriter, r *http.Request) {
     claims, ok := r.Context().Value("claims").(auth.Claims)
     if !ok {
@@ -74,6 +81,10 @@ func (rs ConcertsResource) Create(w http.ResponseWriter, r *http.Request) {
     }
 }
 
+// @Summary Returns concert info
+// @Tags Concerts
+// @Param id path integer true "Concert id"
+// @Router /concerts/{id} [get]
 func (rs ConcertsResource) Get(w http.ResponseWriter, r *http.Request) {
     id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
     if err != nil {
@@ -91,6 +102,11 @@ func (rs ConcertsResource) Get(w http.ResponseWriter, r *http.Request) {
     json.NewEncoder(w).Encode(concert)
 }
 
+// @Summary Updates concert info
+// @Tags Concerts
+// @Param id path integer true "Concert id"
+// @Param concert body domain.Concert true "Updated concert info"
+// @Router /concerts/{id} [put]
 func (rs ConcertsResource) Update(w http.ResponseWriter, r *http.Request) {
     claims, ok := r.Context().Value("claims").(auth.Claims)
     if !ok {

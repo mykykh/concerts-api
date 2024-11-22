@@ -8,6 +8,9 @@ import (
 
     "github.com/go-chi/chi/v5"
     "github.com/jackc/pgx/v5/pgxpool"
+    "github.com/swaggo/http-swagger/v2"
+
+    _ "github.com/mykykh/concerts-api/docs"
 )
 
 type Api struct {
@@ -25,12 +28,17 @@ func connectToDB() (*pgxpool.Pool) {
     return dbpool
 }
 
+// @title Concerts api
 func initRouter(db *pgxpool.Pool) chi.Router {
     router := chi.NewRouter()
 
     router.Mount("/auth", AuthResource{db: db}.Routes())
     router.Mount("/users", UsersResource{db: db}.Routes())
     router.Mount("/concerts", ConcertsResource{db: db}.Routes())
+
+    router.Get("/swagger/*", httpSwagger.Handler(
+        httpSwagger.URL("/swagger/doc.json"),
+    ))
 
     return router
 }

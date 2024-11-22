@@ -1,0 +1,70 @@
+definitions:
+  domain.Concert:
+    properties:
+      author-id:
+        type: string
+      create-date:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      location:
+        type: string
+      title:
+        type: string
+      update-date:
+        type: string
+    type: object
+info:
+  contact: {}
+  title: Concerts api
+paths:
+  /concerts:
+    get:
+      responses: {}
+      summary: Returns list of concerts
+      tags:
+      - Concerts
+    post:
+      parameters:
+      - description: Concert to create
+        in: body
+        name: concert
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Concert'
+      responses: {}
+      summary: Creates new concert
+      tags:
+      - Concerts
+  /concerts/{id}:
+    get:
+      parameters:
+      - description: Concert id
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses: {}
+      summary: Returns concert info
+      tags:
+      - Concerts
+    put:
+      parameters:
+      - description: Concert id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated concert info
+        in: body
+        name: concert
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Concert'
+      responses: {}
+      summary: Updates concert info
+      tags:
+      - Concerts
+swagger: "2.0"

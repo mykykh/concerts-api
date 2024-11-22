@@ -1,0 +1,107 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Concerts api",
+        "contact": {}
+    },
+    "paths": {
+        "/concerts": {
+            "get": {
+                "tags": [
+                    "Concerts"
+                ],
+                "summary": "Returns list of concerts",
+                "responses": {}
+            },
+            "post": {
+                "tags": [
+                    "Concerts"
+                ],
+                "summary": "Creates new concert",
+                "parameters": [
+                    {
+                        "description": "Concert to create",
+                        "name": "concert",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.Concert"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/concerts/{id}": {
+            "get": {
+                "tags": [
+                    "Concerts"
+                ],
+                "summary": "Returns concert info",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Concert id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            },
+            "put": {
+                "tags": [
+                    "Concerts"
+                ],
+                "summary": "Updates concert info",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Concert id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated concert info",
+                        "name": "concert",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.Concert"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        }
+    },
+    "definitions": {
+        "domain.Concert": {
+            "type": "object",
+            "properties": {
+                "author-id": {
+                    "type": "string"
+                },
+                "create-date": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "update-date": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
