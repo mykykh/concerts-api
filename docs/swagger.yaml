@@ -22,6 +22,14 @@ info:
 paths:
   /concerts:
     get:
+      description: |-
+        Returns list of 10 last concerts in db oredered by concert_id.
+        Use last_id query parameter to select concerts before this last_id
+      parameters:
+      - description: id before which to get last concerts
+        in: query
+        name: last_id
+        type: integer
       responses: {}
       summary: Returns list of concerts
       tags:

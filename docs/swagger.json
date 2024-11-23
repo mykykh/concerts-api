@@ -7,10 +7,19 @@
     "paths": {
         "/concerts": {
             "get": {
+                "description": "Returns list of 10 last concerts in db oredered by concert_id.\nUse last_id query parameter to select concerts before this last_id",
                 "tags": [
                     "Concerts"
                 ],
                 "summary": "Returns list of concerts",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id before which to get last concerts",
+                        "name": "last_id",
+                        "in": "query"
+                    }
+                ],
                 "responses": {}
             },
             "post": {

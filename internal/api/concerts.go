@@ -33,13 +33,30 @@ func (rs ConcertsResource) Routes() chi.Router {
 }
 
 // @Summary Returns list of concerts
+// @Description Returns list of 10 last concerts in db oredered by concert_id.
+// @Description Use last_id query parameter to select concerts before this last_id
 // @Tags Concerts
+// @Param last_id query integer false "id before which to get last concerts"
 // @Router /concerts [get]
 func (rs ConcertsResource) GetAll(w http.ResponseWriter, r *http.Request) {
-    concerts, err := concertsRepository.GetAll(rs.db)
+    lastId := r.URL.Query().Get("last_id")
+
+    var concerts []domain.Concert
+    var err error
+
+    if lastId == "" {
+        concerts, err = concertsRepository.GetLast10(rs.db)
+    } else {
+        lastId, err := strconv.ParseInt(lastId, 10, 64)
+        if err != nil {
+            http.Error(w, "Failed to parse last_id", http.StatusBadRequest)
+            return
+        }
+        concerts, err = concertsRepository.GetLast10BeforeId(rs.db, lastId)
+    }
 
     if err != nil {
-        http.Error(w, http.StatusText(500), 500)
+        http.Error(w, "Failed to find concerts", http.StatusInternalServerError)
         return
     }
 

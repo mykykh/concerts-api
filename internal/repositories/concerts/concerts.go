@@ -6,6 +6,7 @@ import (
     "context"
 
     "github.com/gofrs/uuid"
+    "github.com/jackc/pgx/v5"
     "github.com/jackc/pgx/v5/pgxpool"
 
     "github.com/mykykh/concerts-api/internal/domain"
@@ -28,17 +29,8 @@ func Save(db *pgxpool.Pool, concert domain.Concert) error {
     return nil
 }
 
-func GetAll(db *pgxpool.Pool) ([]domain.Concert, error) {
+func parseRows(rows pgx.Rows) ([]domain.Concert, error) {
     var concerts []domain.Concert
-
-    rows, err := db.Query(
-        context.Background(),
-        "SELECT concert_id, title, description, location, author_id, create_date, update_date FROM concerts",
-    )
-
-    if err != nil {
-        return []domain.Concert{}, errors.New("Failed to select rows")
-    }
 
     for rows.Next() {
         var concert domain.Concert
@@ -58,6 +50,33 @@ func GetAll(db *pgxpool.Pool) ([]domain.Concert, error) {
     }
 
     return concerts, nil
+}
+
+func GetLast10(db *pgxpool.Pool) ([]domain.Concert, error) {
+    rows, err := db.Query(
+        context.Background(),
+        "SELECT concert_id, title, description, location, author_id, create_date, update_date FROM concerts ORDER BY concert_id DESC LIMIT 10",
+    )
+
+    if err != nil {
+        return []domain.Concert{}, errors.New("Failed to select rows")
+    }
+
+    return parseRows(rows)
+}
+
+func GetLast10BeforeId(db *pgxpool.Pool, concertId int64) ([]domain.Concert, error) {
+    rows, err := db.Query(
+        context.Background(),
+        "SELECT concert_id, title, description, location, author_id, create_date, update_date FROM concerts WHERE concert_id < $1 ORDER BY concert_id DESC LIMIT 10",
+        concertId,
+    )
+
+    if err != nil {
+        return []domain.Concert{}, errors.New("Failed to select rows")
+    }
+
+    return parseRows(rows)
 }
 
 func GetById(db *pgxpool.Pool, id int64) (*domain.Concert, error) {
