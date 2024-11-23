@@ -29,6 +29,10 @@ func connectToDB() (*pgxpool.Pool) {
 }
 
 // @title Concerts api
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description To obtain token go to [/auth/login](/auth/login). You also need to add Bearer before pasting it belove. It should look like: Bearer your-access-token
 func initRouter(db *pgxpool.Pool) chi.Router {
     router := chi.NewRouter()
 

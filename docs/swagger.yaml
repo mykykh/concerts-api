@@ -35,6 +35,8 @@ paths:
         schema:
           $ref: '#/definitions/domain.Concert'
       responses: {}
+      security:
+      - BearerAuth: []
       summary: Creates new concert
       tags:
       - Concerts
@@ -64,7 +66,16 @@ paths:
         schema:
           $ref: '#/definitions/domain.Concert'
       responses: {}
+      security:
+      - BearerAuth: []
       summary: Updates concert info
       tags:
       - Concerts
+securityDefinitions:
+  BearerAuth:
+    description: 'To obtain token go to [/auth/login](/auth/login). You also need
+      to add Bearer before pasting it belove. It should look like: Bearer your-access-token'
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

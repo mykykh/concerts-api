@@ -49,6 +49,7 @@ func (rs ConcertsResource) GetAll(w http.ResponseWriter, r *http.Request) {
 // @Summary Creates new concert
 // @Tags Concerts
 // @Param concert body domain.Concert true "Concert to create"
+// @Security BearerAuth
 // @Router /concerts [post]
 func (rs ConcertsResource) Create(w http.ResponseWriter, r *http.Request) {
     claims, ok := r.Context().Value("claims").(auth.Claims)
@@ -106,6 +107,7 @@ func (rs ConcertsResource) Get(w http.ResponseWriter, r *http.Request) {
 // @Tags Concerts
 // @Param id path integer true "Concert id"
 // @Param concert body domain.Concert true "Updated concert info"
+// @Security BearerAuth
 // @Router /concerts/{id} [put]
 func (rs ConcertsResource) Update(w http.ResponseWriter, r *http.Request) {
     claims, ok := r.Context().Value("claims").(auth.Claims)
