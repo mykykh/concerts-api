@@ -10,9 +10,9 @@ RUN go mod tidy
 RUN go mod download
 
 # Build
-RUN CGO_ENABLED=0 GOOS=linux go build -o /docker-gs-ping
+RUN CGO_ENABLED=0 GOOS=linux go build -o /concerts-api
 
 EXPOSE 8080
 
 # Run
-CMD ["/docker-gs-ping"]
+CMD ["/concerts-api"]
