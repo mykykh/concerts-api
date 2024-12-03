@@ -16,6 +16,21 @@ definitions:
       update-date:
         type: string
     type: object
+  domain.Ticket:
+    properties:
+      concert-id:
+        type: integer
+      create-date:
+        type: string
+      id:
+        type: integer
+      update-date:
+        type: string
+      user-id:
+        type: string
+      verification-token:
+        type: string
+    type: object
 info:
   contact: {}
   title: Concerts api
@@ -79,6 +94,99 @@ paths:
       summary: Updates concert info
       tags:
       - Concerts
+  /tickets:
+    get:
+      description: |-
+        Returns list of 10 last tickets in db oredered by ticket_id.
+        Use last_id query parameter to select tickets before this last_id
+      parameters:
+      - description: id before which to get last tickets
+        in: query
+        name: last_id
+        type: integer
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Returns list of tickets
+      tags:
+      - Tickets
+    post:
+      parameters:
+      - description: Ticket to create
+        in: body
+        name: ticket
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Ticket'
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Creates new ticket
+      tags:
+      - Tickets
+  /tickets/{id}:
+    get:
+      parameters:
+      - description: Ticket id
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Returns ticket info
+      tags:
+      - Tickets
+    put:
+      parameters:
+      - description: Ticket id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated ticket info
+        in: body
+        name: ticket
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Ticket'
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Updates ticket info
+      tags:
+      - Tickets
+  /tickets/{id}/token:
+    put:
+      parameters:
+      - description: Ticket id
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Updates ticket verification token
+      tags:
+      - Tickets
+  /tickets/own:
+    get:
+      description: |-
+        Returns list of 10 last tickets that the user has in db oredered by ticket_id.
+        Use last_id query parameter to select tickets before this last_id
+      parameters:
+      - description: id before which to get last tickets
+        in: query
+        name: last_id
+        type: integer
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Returns list of tickets that user has
+      tags:
+      - Tickets
 securityDefinitions:
   BearerAuth:
     description: 'To obtain token go to [/auth/login](/auth/login). You also need

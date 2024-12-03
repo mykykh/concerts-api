@@ -39,6 +39,7 @@ func initRouter(db *pgxpool.Pool) chi.Router {
     router.Mount("/auth", AuthResource{db: db}.Routes())
     router.Mount("/users", UsersResource{db: db}.Routes())
     router.Mount("/concerts", ConcertsResource{db: db}.Routes())
+    router.Mount("/tickets", TicketsResource{db: db}.Routes())
 
     router.Get("/swagger/*", httpSwagger.Handler(
         httpSwagger.URL("/swagger/doc.json"),
