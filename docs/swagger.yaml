@@ -157,6 +157,20 @@ paths:
       summary: Updates ticket info
       tags:
       - Tickets
+  /tickets/{id}/token:
+    put:
+      parameters:
+      - description: Ticket id
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Updates ticket verification token
+      tags:
+      - Tickets
   /tickets/own:
     get:
       description: |-

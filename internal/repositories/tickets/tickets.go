@@ -131,7 +131,7 @@ func GetById(db *pgxpool.Pool, id int64) (*domain.Ticket, error) {
 func Update(db *pgxpool.Pool, ticket domain.Ticket) error {
     _, err := db.Exec(
         context.Background(),
-        "UPDATE tickets SET verificationToken=$2 WHERE ticket_id=$1",
+        "UPDATE tickets SET verification_token=$2 WHERE ticket_id=$1",
         ticket.ID,
         ticket.VerificationToken,
     )

@@ -225,6 +225,29 @@ const docTemplate = `{
                 ],
                 "responses": {}
             }
+        },
+        "/tickets/{id}/token": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "Tickets"
+                ],
+                "summary": "Updates ticket verification token",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Ticket id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
         }
     },
     "definitions": {

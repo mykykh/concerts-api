@@ -28,6 +28,7 @@ func (rs TicketsResource) Routes() chi.Router {
     r.Route("/{id}", func (r chi.Router) {
         r.With(middlewares.AuthMiddleware).Get("/", rs.Get)
         r.With(middlewares.AuthMiddleware).Put("/", rs.Update)
+        r.With(middlewares.AuthMiddleware).Put("/token", rs.UpdateToken)
     })
 
     return r
@@ -141,6 +142,12 @@ func (rs TicketsResource) Create(w http.ResponseWriter, r *http.Request) {
     }
 
     ticket.UserID = claims.ID
+    err = ticket.UpdateVerificationToken();
+
+    if err != nil {
+        http.Error(w, "Failed to generate new token", http.StatusInternalServerError)
+        return
+    }
 
     err = ticketsRepository.Save(rs.db, ticket);
 
@@ -191,6 +198,62 @@ func (rs TicketsResource) Get(w http.ResponseWriter, r *http.Request) {
         json.NewEncoder(w).Encode(ticket)
     } else {
         http.Error(w, "Permission to view ticket not found", http.StatusUnauthorized)
+    }
+}
+
+// @Summary Updates ticket verification token
+// @Tags Tickets
+// @Param id path integer true "Ticket id"
+// @Security BearerAuth
+// @Router /tickets/{id}/token [put]
+func (rs TicketsResource) UpdateToken(w http.ResponseWriter, r *http.Request) {
+    claims, ok := r.Context().Value("claims").(auth.Claims)
+    if !ok {
+        http.Error(w, "No claims found", http.StatusUnauthorized)
+        return
+    }
+
+    id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+    if err != nil {
+        http.Error(w, "Failed to parse id", http.StatusBadRequest)
+        return
+    }
+
+    var ticket *domain.Ticket
+    if claims.HasResourceAccessRole("concerts-api", "update:tickets") {
+        ticket, err = ticketsRepository.GetById(rs.db, id)
+        if err != nil {
+            http.Error(w, "Ticket not found", http.StatusNotFound)
+            return
+        }
+    } else if claims.HasResourceAccessRole("concerts-api", "update:ownTickets") {
+        ticket, err = ticketsRepository.GetById(rs.db, id)
+        if err != nil {
+            http.Error(w, "Ticket not found", http.StatusNotFound)
+            return
+        }
+
+        if ticket.UserID != claims.ID {
+            http.Error(w, "Permsision to update ticket not found", http.StatusUnauthorized)
+            return
+        }
+    } else {
+        http.Error(w, "Permsision to update ticket not found", http.StatusUnauthorized)
+        return
+    }
+
+    err = ticket.UpdateVerificationToken();
+
+    if err != nil {
+        http.Error(w, "Failed to generate new token", http.StatusInternalServerError)
+        return
+    }
+
+    err = ticketsRepository.Update(rs.db, *ticket);
+
+    if err != nil {
+        http.Error(w, "Failed to save ticket to db", http.StatusInternalServerError)
+        return
     }
 }
 
